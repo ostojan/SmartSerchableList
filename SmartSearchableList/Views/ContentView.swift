@@ -5,20 +5,22 @@
 //  Created by Aleksander Stojanowski
 //
 
+import SwiftData
 import SwiftUI
 
 struct ContentView: View {
+    @State
+    private var searchText = ""
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            ProductsListing(withName: searchText)
+                .searchable(text: $searchText)
         }
-        .padding()
     }
 }
 
 #Preview {
     ContentView()
+        .modelContainer(DataHelper.shared.modelContainer)
 }

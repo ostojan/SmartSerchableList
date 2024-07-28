@@ -13,8 +13,26 @@ struct ProductsListing: View {
     @Query
     private var filteredProducts: [Product]
 
+    private var searchText: String {
+        nonexistentProduct.name
+    }
+
+    private var indexOfSearchProduct: Int? {
+        filteredProducts.firstIndex(where: { $0.name.localizedCaseInsensitiveCompare(searchText) == .orderedSame })
+    }
+
     private var showNewProduct: Bool {
-        !nonexistentProduct.name.isEmpty && !filteredProducts.contains(where: { $0.name.localizedCaseInsensitiveCompare(nonexistentProduct.name) == .orderedSame })
+        !searchText.isEmpty
+    }
+
+    private var productsToShow: [Product] {
+        var products = filteredProducts
+        if let indexOfSearchProduct {
+            products.move(fromOffsets: IndexSet(integer: indexOfSearchProduct), toOffset: 0)
+        } else if showNewProduct {
+            products.insert(nonexistentProduct, at: 0)
+        }
+        return products
     }
 
     init(withName searchText: String) {
@@ -31,18 +49,10 @@ struct ProductsListing: View {
 
     var body: some View {
         List {
-            if showNewProduct {
-                Section {
-                    ProductTile(nonexistentProduct)
-                }
-            }
-            Section {
-                ForEach(filteredProducts) {
-                    ProductTile($0)
-                }
+            ForEach(productsToShow) {
+                ProductTile($0)
             }
         }
-        .animation(.default, value: filteredProducts)
-        .animation(.default, value: nonexistentProduct)
+        .animation(.default, value: productsToShow)
     }
 }
